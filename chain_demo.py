@@ -27,14 +27,14 @@ llm_chain = RunnableLambda(simulate_llm)
 # ==========================================
 # 2. 传统做法：同步生成（我已帮你写好，作为对照组）
 # ==========================================
-def sync_generate(topic: str, styles: list):
+async def sync_generate(topic: str, styles: list):
     print("\n--- 🐌 开始【同步】生成 ---")
     start_time = time.time()
 
     results = []
     for style in styles:
         # 注意：这里使用的是同步的 invoke
-        res = llm_chain.invoke({"topic": topic, "style": style})
+        res = await llm_chain.ainvoke({"topic": topic, "style": style})
         results.append(res)
 
     print(f"🐌 同步生成总耗时: {time.time() - start_time:.2f} 秒")
@@ -54,14 +54,16 @@ async def async_generate(topic: str, styles: list):
 
     # 👇 请在下方写下你的代码：
 
+    tasks = [llm_chain.ainvoke({"topic": topic, "style": style}) for style in styles]
+    results = await asyncio.gather(*tasks)
     # results = await asyncio.gather(
     #     写下你的 3 个任务...
     # )
 
-    # 👆 ----------------------
+    # 👆 -----------------------
 
     print(f"🚀 异步生成总耗时: {time.time() - start_time:.2f} 秒")
-    # return results  # 解开这行的注释
+    return results  # 解开这行的注释
 
 
 # ==========================================
@@ -73,10 +75,11 @@ async def main():
 
     # 先运行同步版本看看有多慢 (约 6 秒)
     # 注意：同步函数直接调用即可
-    sync_generate(topic, styles)
+    await sync_generate(topic, styles)
 
     # 再运行你写的异步版本看看有多快 (期望约 2 秒)
-    # await async_generate(topic, styles) # 写完后解开这行的注释！
+    results = await async_generate(topic, styles) # 写完后解开这行的注释！
+    print(results)
 
 
 if __name__ == "__main__":
