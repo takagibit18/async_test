@@ -1,0 +1,84 @@
+# Git 命令说明
+
+以下是一些常用的 Git 命令及其简单说明：
+
+## 初始化仓库
+```bash
+git init
+```
+这个命令用于初始化一个新的 Git 仓库。在项目根目录下运行这个命令后，Git 会创建一个 `.git` 子目录，其中包含所有必要的 Git 元数据。
+
+## 添加文件到暂存区
+```bash
+git add .
+```
+这个命令将当前目录下的所有文件添加到 Git 暂存区。暂存区是一个中间区域，用于准备即将提交的更改。你也可以指定特定文件，例如 `git add filename.py`。
+
+## 提交更改
+```bash
+git commit -m "Initial commit"
+```
+这个命令用于将暂存区的更改提交到本地仓库。`-m` 参数后面跟着的是提交信息，用于描述这次提交的内容。提交信息应该简洁明了，例如 "Initial commit" 表示这是项目的初始提交。
+
+## 添加远程仓库
+```bash
+git remote add origin https://github.com/takagibit18/async_test.git
+```
+这个命令用于添加一个远程仓库。`origin` 是远程仓库的别名，通常用于表示主仓库。后面的 URL 是远程仓库的地址。这个命令只需要在第一次推送代码时运行一次。
+
+## 推送代码到远程仓库
+```bash
+git push -u origin master
+```
+这个命令用于将本地提交的代码推送到远程仓库。`-u` 参数用于设置默认的远程分支，这样以后可以直接使用 `git push` 而不需要指定分支。`origin` 是远程仓库的别名，`master` 是本地分支的名称。
+
+## 查看远程仓库
+```bash
+git remote -v
+```
+这个命令用于查看当前配置的远程仓库及其 URL。`-v` 参数表示详细输出，显示远程仓库的读写 URL。
+
+## 修改远程仓库 URL
+```bash
+git remote set-url origin https://github.com/takagibit18/async_test.git
+```
+这个命令用于修改已有的远程仓库 URL。当你需要更改远程仓库的地址时（例如，仓库名称或用户名发生变化），可以使用这个命令。
+
+## 配置 Git 用户信息
+```bash
+git config --global user.name "lenovo123"
+git config --global user.email "lenovo123@example.com"
+```
+这些命令用于配置 Git 的全局用户信息。`user.name` 设置你的 GitHub 用户名，`user.email` 设置你的 GitHub 注册邮箱。这些信息会出现在你的提交记录中。
+
+## 设置 HTTP 代理
+```bash
+git config --global http.proxy "http://127.0.0.1:30002"
+```
+这个命令用于设置 Git 使用 HTTP 代理服务器。当你在防火墙后面或需要通过代理访问互联网时，可以使用这个命令。`http://127.0.0.1:30002` 是代理服务器的地址和端口。
+
+## 取消设置 HTTP 代理
+```bash
+git config --global --unset http.proxy
+```
+这个命令用于取消设置 Git 的 HTTP 代理。当你不再需要通过代理访问互联网时，可以使用这个命令。
+
+## 查看 Git 配置
+```bash
+git config --list
+```
+这个命令用于查看当前的 Git 配置。它会列出所有的 Git 配置项，包括用户信息、代理设置等。
+
+## 查看提交历史
+```bash
+git log
+```
+这个命令用于查看提交历史。它会显示每次提交的哈希值、作者、日期和提交信息。你可以按 `q` 键退出查看模式。
+
+## 查看当前状态
+```bash
+git status
+```
+这个命令用于查看当前仓库的状态。它会显示哪些文件被修改但未提交，哪些文件已经添加到暂存区等信息。
+
+这些命令是 Git 的基本操作，适用于大多数项目管理和版本控制的场景。希望这些说明能帮助你更好地理解和使用 Git！
