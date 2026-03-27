@@ -1,0 +1,124 @@
+# llm_async_learning
+
+一个面向学习的 OpenAI API 示例项目，包含：
+
+- asyncio 并发控制（Semaphore）
+- Pydantic v2 数据验证
+- tenacity 重试机制封装
+- OpenAI 核心能力 Demo：Chat / Embedding / Function Calling / Streaming
+- tiktoken Token 计数与每次调用记录（仅记录 token，不计算金额）
+- pytest + pytest-cov，覆盖率阈值 70%
+
+## 1. 环境要求
+
+- Python 3.12
+
+## 2. 安装
+
+```bash
+pip install -e .
+pip install -e .[dev]
+```
+
+如果你不使用 editable 模式，也可以：
+
+```bash
+pip install .
+pip install "pytest>=8.3.0" "pytest-asyncio>=0.25.0" "pytest-cov>=6.0.0"
+```
+
+## 3. 配置 API
+
+1. 复制 `.env.example` 为 `.env`
+2. 手动填写以下字段：
+
+```env
+OPENAI_API_KEY=
+OPENAI_BASE_URL=
+OPENAI_MODEL=gpt-4.1-mini
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_MAX_CONCURRENCY=5
+OPENAI_TIMEOUT_SECONDS=30
+OPENAI_RETRY_ATTEMPTS=3
+OPENAI_RETRY_MIN_SECONDS=1
+OPENAI_RETRY_MAX_SECONDS=8
+```
+
+## 4. 运行 Demo
+
+在项目根目录执行：
+
+```bash
+python run_demos.py --mode all
+```
+
+可选模式：
+
+- `chat`
+- `embedding`
+- `function`
+- `stream`
+- `all`
+
+示例：
+
+```bash
+python run_demos.py --mode chat
+```
+
+## 5. 测试与覆盖率
+
+```bash
+pytest
+```
+
+说明：
+
+- 已配置 `--cov-fail-under=70`
+- 默认单元测试全部基于 mock，不依赖真实网络
+- 集成测试默认跳过
+
+启用真实 API 集成测试：
+
+```bash
+RUN_INTEGRATION=1 pytest -m integration
+```
+
+Windows PowerShell 下：
+
+```powershell
+$env:RUN_INTEGRATION="1"; pytest -m integration
+```
+
+## 6. 项目结构
+
+```text
+llm_async_learning/
+  src/llm_async_learning/
+    client.py              # 异步客户端 + 并发控制 + 重试封装
+    config.py              # Pydantic Settings (.env)
+    models.py              # 请求/响应与使用记录模型
+    token_counter.py       # tiktoken 计数
+    usage_tracker.py       # 调用 token 记录汇总
+    demos/
+      chat_demo.py
+      embedding_demo.py
+      function_calling_demo.py
+      streaming_demo.py
+  tests/
+    test_client.py
+    test_demos.py
+    test_token_counter.py
+    integration/test_openai_integration.py
+  run_demos.py
+  .env.example
+  pyproject.toml
+```
+
+## 7. 关键实现要点
+
+- 并发控制：`LLMClient` 内部使用 `asyncio.Semaphore` 限制并发请求数
+- 重试机制：`tenacity.AsyncRetrying` 对超时/限流异常进行指数退避重试
+- 数据验证：所有输入输出通过 Pydantic v2 模型约束
+- Streaming：提供文本增量流式读取与合并
+- Token 记录：优先读取 API usage，缺失时用 tiktoken 估算
