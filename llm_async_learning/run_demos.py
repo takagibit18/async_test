@@ -2,6 +2,14 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
+from pathlib import Path
+
+# Allow direct script execution in src-layout projects without requiring editable install.
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from llm_async_learning.client import LLMClient
 from llm_async_learning.config import load_settings
@@ -27,21 +35,33 @@ async def main(mode: str) -> None:
         print(await run_streaming_demo(client))
     else:
         # Run demos concurrently to show asyncio scheduling and shared semaphore limits.
-        chat_task = asyncio.create_task(run_chat_demo(client))
-        embed_task = asyncio.create_task(run_embedding_demo(client))
-        func_task = asyncio.create_task(run_function_calling_demo(client))
-        stream_task = asyncio.create_task(run_streaming_demo(client))
+        # With graceful error handling so one failure doesn't stop others.
+        async def safe_demo(name: str, coro):
+            try:
+                result = await coro
+                print(f"✓ {name}: OK")
+                return name, result, None
+            except Exception as e:
+                print(f"✗ {name}: {type(e).__name__}: {str(e)[:100]}")
+                return name, None, e
 
-        chat_text, embed_count, func_data, stream_text = await asyncio.gather(
-            chat_task,
-            embed_task,
-            func_task,
-            stream_task,
+        results = await asyncio.gather(
+            safe_demo("chat", run_chat_demo(client)),
+            safe_demo("embedding", run_embedding_demo(client)),
+            safe_demo("function_call", run_function_calling_demo(client)),
+            safe_demo("stream", run_streaming_demo(client)),
         )
-        print("chat:", chat_text)
-        print("embedding vectors:", embed_count)
-        print("function calling:", func_data)
-        print("stream:", stream_text)
+        for name, result, error in results:
+            if error is None:
+                if name == "embedding":
+                    print(f"  embedding vectors: {result}")
+                elif name == "function_call":
+                    print(f"  tool info: {result}")
+                elif name == "stream":
+                    print(f"  streamed: {result[:50]}...")
+                else:
+                    print(f"  response: {result[:50]}...")
+            # Errors already printed above
 
     usage = client.usage_summary()
     print("token usage summary:", usage.model_dump())

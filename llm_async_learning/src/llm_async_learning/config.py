@@ -1,4 +1,6 @@
-from pydantic import Field, SecretStr
+from pathlib import Path
+
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,8 +18,20 @@ class AppSettings(BaseSettings):
     openai_retry_min_seconds: int = Field(default=1, alias="OPENAI_RETRY_MIN_SECONDS", ge=0)
     openai_retry_max_seconds: int = Field(default=8, alias="OPENAI_RETRY_MAX_SECONDS", ge=1)
 
+    @field_validator("openai_base_url", mode="before")
+    @classmethod
+    def normalize_base_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if not normalized:
+            return None
+        if not (normalized.startswith("http://") or normalized.startswith("https://")):
+            raise ValueError("OPENAI_BASE_URL must start with http:// or https://")
+        return normalized
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).resolve().parents[2] / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         populate_by_name=True,
