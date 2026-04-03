@@ -44,10 +44,6 @@
   </a>
 </p>
 
-<p align="left">
-  Replace <strong>YOUR_USERNAME</strong>, <strong>YOUR_PROJECT_ONE</strong>, and <strong>YOUR_PROJECT_TWO</strong> with your real repository names.
-</p>
-
 ---
 
 ## Contribution Graph
@@ -71,8 +67,3 @@
 - I value disciplined iteration, clear technical documentation, and continuous improvement from feedback.
 
 ---
-
-## Notes
-
-- This is a Profile README template. Move/copy it into the README of your username repository.
-- Website/app jump entry is intentionally removed as requested.
